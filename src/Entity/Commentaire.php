@@ -24,7 +24,6 @@ class Commentaire
     #[Assert\NotNull(message: 'L\'utilisateur ne doit pas être vide.')]
     private ?User $users = null;
 
-    #[ORM\ManyToOne(inversedBy: 'commentaires')]
     #[ORM\ManyToOne(targetEntity: Recette::class, inversedBy: 'commentaires')]
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     #[Assert\NotNull(message: 'La recette ne doit pas être vide.')]

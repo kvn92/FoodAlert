@@ -11,6 +11,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: RecetteRepository::class)]
+#[ORM\Table(name: "recette", uniqueConstraints: [
+    new ORM\UniqueConstraint(name: "unique_recette_utilisateur", columns: ["titre", "users_id"])
+])]
+
 class Recette
 {
     #[ORM\Id]
