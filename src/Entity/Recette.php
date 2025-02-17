@@ -64,11 +64,25 @@ class Recette
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'recette')]
     private Collection $commentaires;
 
+    /**
+     * @var Collection<int, LikeRecette>
+     */
+    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'recette', orphanRemoval: true)]
+    private Collection $likeRecettes;
+
+    /**
+     * @var Collection<int, SauvegardeRecette>
+     */
+    #[ORM\OneToMany(targetEntity: SauvegardeRecette::class, mappedBy: 'recette', orphanRemoval: true)]
+    private Collection $sauvegardeRecettes;
+
     public function __construct()
     {
         $this->isActive = false;
         $this->createAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
         $this->commentaires = new ArrayCollection();
+        $this->likeRecettes = new ArrayCollection();
+        $this->sauvegardeRecettes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -172,6 +186,66 @@ class Recette
             // set the owning side to null (unless already changed)
             if ($commentaire->getRecette() === $this) {
                 $commentaire->setRecette(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LikeRecette>
+     */
+    public function getLikeRecettes(): Collection
+    {
+        return $this->likeRecettes;
+    }
+
+    public function addLikeRecette(LikeRecette $likeRecette): static
+    {
+        if (!$this->likeRecettes->contains($likeRecette)) {
+            $this->likeRecettes->add($likeRecette);
+            $likeRecette->setRecette($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLikeRecette(LikeRecette $likeRecette): static
+    {
+        if ($this->likeRecettes->removeElement($likeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($likeRecette->getRecette() === $this) {
+                $likeRecette->setRecette(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SauvegardeRecette>
+     */
+    public function getSauvegardeRecettes(): Collection
+    {
+        return $this->sauvegardeRecettes;
+    }
+
+    public function addSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
+    {
+        if (!$this->sauvegardeRecettes->contains($sauvegardeRecette)) {
+            $this->sauvegardeRecettes->add($sauvegardeRecette);
+            $sauvegardeRecette->setRecette($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
+    {
+        if ($this->sauvegardeRecettes->removeElement($sauvegardeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($sauvegardeRecette->getRecette() === $this) {
+                $sauvegardeRecette->setRecette(null);
             }
         }
 

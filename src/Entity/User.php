@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Constraints\NotNull;
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_PSEUDO', fields: ['pseudo'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -53,7 +54,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column(type: Types::STRING, length: 255)]
-    #[NotBlank(message: 'Le mot de passe ne doit pas être vide.')]
     #[Length(min: 6, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
     private ?string $password = null;
 
@@ -90,12 +90,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'users')]
     private Collection $commentaires;
 
+    /**
+     * @var Collection<int, LikeRecette>
+     */
+    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'users', orphanRemoval: true)]
+    private Collection $likeRecettes;
+
+    /**
+     * @var Collection<int, SauvegardeRecette>
+     */
+    #[ORM\OneToMany(targetEntity: SauvegardeRecette::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $sauvegardeRecettes;
+
+    /**
+     * @var Collection<int, UserFollow>
+     */
+    #[ORM\OneToMany(targetEntity: UserFollow::class, mappedBy: 'follower', orphanRemoval: true)]
+    private Collection $userFollows;
+
    public function __construct()
 {
     $this->isActive = true;
     $this->createAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
     $this->recettes = new ArrayCollection();
     $this->commentaires = new ArrayCollection();
+    $this->likeRecettes = new ArrayCollection();
+    $this->sauvegardeRecettes = new ArrayCollection();
+    $this->userFollows = new ArrayCollection();
 }
 
   
@@ -278,6 +299,96 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($commentaire->getUsers() === $this) {
                 $commentaire->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LikeRecette>
+     */
+    public function getLikeRecettes(): Collection
+    {
+        return $this->likeRecettes;
+    }
+
+    public function addLikeRecette(LikeRecette $likeRecette): static
+    {
+        if (!$this->likeRecettes->contains($likeRecette)) {
+            $this->likeRecettes->add($likeRecette);
+            $likeRecette->setUsers($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLikeRecette(LikeRecette $likeRecette): static
+    {
+        if ($this->likeRecettes->removeElement($likeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($likeRecette->getUsers() === $this) {
+                $likeRecette->setUsers(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SauvegardeRecette>
+     */
+    public function getSauvegardeRecettes(): Collection
+    {
+        return $this->sauvegardeRecettes;
+    }
+
+    public function addSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
+    {
+        if (!$this->sauvegardeRecettes->contains($sauvegardeRecette)) {
+            $this->sauvegardeRecettes->add($sauvegardeRecette);
+            $sauvegardeRecette->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
+    {
+        if ($this->sauvegardeRecettes->removeElement($sauvegardeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($sauvegardeRecette->getUser() === $this) {
+                $sauvegardeRecette->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserFollow>
+     */
+    public function getUserFollows(): Collection
+    {
+        return $this->userFollows;
+    }
+
+    public function addUserFollow(UserFollow $userFollow): static
+    {
+        if (!$this->userFollows->contains($userFollow)) {
+            $this->userFollows->add($userFollow);
+            $userFollow->setFollower($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserFollow(UserFollow $userFollow): static
+    {
+        if ($this->userFollows->removeElement($userFollow)) {
+            // set the owning side to null (unless already changed)
+            if ($userFollow->getFollower() === $this) {
+                $userFollow->setFollower(null);
             }
         }
 
