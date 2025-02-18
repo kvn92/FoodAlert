@@ -16,11 +16,10 @@
         <h1>{{ recette.titre }}</h1>
         <p><img src="/recettes/images/{{ recette.photo }}" alt="{{ recette.titre }}" style="max-width:100%; height:auto;"></p>
 
-        <p><strong>Nombre de likes :</strong> {{ recette.nbLike }}</p>
-        <p><strong>Nombre de likes :</strong> {{ recette.nbLike }}</p>
+
         {% set userHasLiked = false %}
         {% for like in recette.likeRecettes %}
-            {% if like.utilisateur == app.user %}
+            {% if like.user == app.user %}
                 {% set userHasLiked = true %}
             {% endif %}
         {% endfor %}
@@ -47,19 +46,14 @@
     <ul>
         {% for commentaire in commentaires %}
             <li>
-                <p> <img src="/admin/images/{{ commentaire.utilisateur.photo }}" alt="{{ commentaire.utilisateur.photo }}" style="max-width:10%; height:10;">
-                 {{ commentaire.utilisateur.pseudo }}</p>
+                <p> <img src="#" alt="#" style="max-width:10%; height:10;">
+                 {{ commentaire.user.pseudo }}</p>
                 <p>{{ commentaire.commentaire }}</p>
                 <small>Posté le {{ commentaire.createAt | date('d-m-Y H:i') }}</small>
                 
-                {# Vérifiez si l'utilisateur connecté est l'auteur du commentaire #}
-                {% if commentaire.utilisateur.id == app.user.id %}
-                    <form action="{{ path('commentaire.supprimer', {id: commentaire.id}) }}" method="post" style="display: inline;">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
-    <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
-        Supprimer
-    </button>
-</form>
+                {# Vérifiez si l'user connecté est l'auteur du commentaire #}
+                {% if commentaire.user.id == app.user.id %}
+
                     </form>
                 {% endif %}
             </li>

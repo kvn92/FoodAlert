@@ -37,10 +37,7 @@ class Commentaire
     private ?string $commentaire = null;
 
 
-    #[Assert\Regex(
-        pattern: "/^[\p{L}0-9.,!?;:'\"(){}\[\]\n\r\- ]{10," . self::MAX_COMMENT_LENGTH . "}$/u",
-        message: 'Le commentaire contient des caractères non autorisés.'
-    )] 
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $isActive = false;
 

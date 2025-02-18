@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Commentaire;
+use App\Entity\LikeRecette;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,6 +13,7 @@ use App\Entity\Recette;
 use App\Form\CommentaireType;
 use App\Form\RecetteType;
 use App\Repository\CommentaireRepository;
+use App\Repository\LikeRecetteRepository;
 use App\Repository\RecetteRepository;
 use App\Service\DeleteService;
 use App\Service\StatsService;
@@ -213,4 +215,47 @@ public function show(
         $this->addFlash('error', 'Échec de la suppression.');
         return $this->redirectToRoute($wordEntity.'.index');
     }
-}
+
+    #[Route('/{id}/like', name: 'like', methods: ['POST'])]
+    public function toggleLike(
+        int $id, 
+        RecetteRepository $recetteRepository, 
+        LikeRecetteRepository $likeRecetteRepository, 
+        EntityManagerInterface $entityManager,
+        Security $security
+    ): Response {
+        $recette = $recetteRepository->find($id);
+        $user = $security->getUser();
+    
+        if (!$recette) {
+            throw $this->createNotFoundException('Recette introuvable.');
+        }
+    
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour liker une recette.');
+            return $this->redirectToRoute('recette.show', ['id' => $id]);
+        }
+    
+        // Vérifier si l'utilisateur a déjà liké cette recette
+        $like = $likeRecetteRepository->findOneBy(['user' => $user, 'recette' => $recette]);
+    
+        if ($like) {
+            // Supprimer le like
+            $entityManager->remove($like);
+            $this->addFlash('success', 'Like retiré.');
+        } else {
+            // Ajouter un like
+            $like = new LikeRecette();
+            $like->setUser($user);
+            $like->setRecette($recette);
+            $like->setIsActive(true);
+            $entityManager->persist($like);
+            $this->addFlash('success', 'Recette likée.');
+        }
+    
+        $entityManager->flush();
+    
+        return $this->redirectToRoute('recette.show', ['id' => $id]);
+    }
+
+}   
