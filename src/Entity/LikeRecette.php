@@ -3,9 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LikeRecetteRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use Doctrine\DBAL\Types\Types;
 #[ORM\Entity(repositoryClass: LikeRecetteRepository::class)]
 class LikeRecette
 {
@@ -14,18 +13,19 @@ class LikeRecette
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'likeRecettes', targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?User $users = null;
+    #[ORM\ManyToOne(inversedBy: 'likeRecettes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'likeRecettes', targetEntity: Recette::class)]
-    #[ORM\JoinColumn(nullable: false,  onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(inversedBy: 'likeRecettes')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Recette $recette = null;
 
-    #[ORM\Column(type:Types::BOOLEAN, options: ['default' => true])]
+    #[ORM\Column(type: Types::BOOLEAN, options:['default'=>true])]
     private bool $isActive = true;
 
-    function __construct()
+
+    public function __construct()
     {
         $this->isActive = true;
     }
@@ -35,14 +35,14 @@ class LikeRecette
         return $this->id;
     }
 
-    public function getUsers(): ?User
+    public function getUser(): ?User
     {
-        return $this->users;
+        return $this->user;
     }
 
-    public function setUsers(?User $users): static
+    public function setUser(?User $user): static
     {
-        $this->users = $users;
+        $this->user = $user;
 
         return $this;
     }

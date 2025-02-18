@@ -10,23 +10,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
 class Commentaire
 {
+    const MAX_COMMENT_LENGTH = 400;
 
-    const MAX_COMMENT_LENGTH = 255;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'commentaires')]
-    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
-    #[Assert\NotNull(message: 'L\'utilisateur ne doit pas être vide.')]
-    private ?User $users = null;
+    #[ORM\ManyToOne(inversedBy: 'commentaires')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
-    #[ORM\ManyToOne(targetEntity: Recette::class, inversedBy: 'commentaires')]
-    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
-    #[Assert\NotNull(message: 'La recette ne doit pas être vide.')]
+    #[ORM\ManyToOne(inversedBy: 'commentaires')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Recette $recette = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -37,18 +34,18 @@ class Commentaire
         max: self::MAX_COMMENT_LENGTH,
         maxMessage: 'Le commentaire ne doit pas dépasser {{ limit }} caractères.'
     )]
+    private ?string $commentaire = null;
+
 
     #[Assert\Regex(
         pattern: "/^[\p{L}0-9.,!?;:'\"(){}\[\]\n\r\- ]{10," . self::MAX_COMMENT_LENGTH . "}$/u",
         message: 'Le commentaire contient des caractères non autorisés.'
-    )]
-    
-    private ?string $commentaire = null;
-
+    )] 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $isActive = false;
 
-    #[ORM\Column]
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createAt = null;
 
     public function __construct()
@@ -57,19 +54,20 @@ class Commentaire
         $this->createAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
     }
 
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUsers(): ?User
+    public function getUser(): ?User
     {
-        return $this->users;
+        return $this->user;
     }
 
-    public function setUsers(?User $users): static
+    public function setUser(?User $user): static
     {
-        $this->users = $users;
+        $this->user = $user;
 
         return $this;
     }
@@ -91,7 +89,7 @@ class Commentaire
         return $this->commentaire;
     }
 
-    public function setCommentaire(?string $commentaire): static
+    public function setCommentaire(string $commentaire): static
     {
         $this->commentaire = $commentaire;
 

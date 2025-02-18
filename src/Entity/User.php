@@ -14,7 +14,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -26,16 +26,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type:'integer')]
+    #[ORM\Column(type:Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\Column(type:'string',length: 180,unique: true)]
+
+    #[ORM\Column(type:Types::STRING,length: 30, unique: true)]
+    #[NotBlank(message: 'Le pseudo ne doit pas être vide.')]
+    #[Length(min: 3, max: 30, minMessage: 'Le pseudo doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le pseudo doit contenir au maximum {{ limit }} caractères.')]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-Z0-9._-]{3,30}$/",
+        message: 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.'
+    )]
+    private ?string $pseudo = null;
+
+
+
+    #[ORM\Column(type:Types::STRING,length: 180,unique: true)]
     #[NotBlank(message: 'L\'email ne doit pas être vide.')]
     #[Assert\Email(message: 'L\'email n\'est pas valide.')]
-    #[Assert\Regex(
-        pattern: "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/",
-        message: 'Le format de l\'email est invalide.'
-    )]
     #[Assert\Length(
         min: 3,
         minMessage: 'L\'email doit contenir au moins {{ limit }} caractères.',
@@ -57,56 +65,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Length(min: 6, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
     private ?string $password = null;
 
-    #[ORM\Column(type:'string',length: 30, unique: true)]
-    #[NotBlank(message: 'Le pseudo ne doit pas être vide.')]
-    #[Length(min: 3, max: 30, minMessage: 'Le pseudo doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le pseudo doit contenir au maximum {{ limit }} caractères.')]
-    #[Assert\Regex(
-        pattern: "/^[a-zA-Z0-9._-]{3,30}$/",
-        message: 'Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.'
-    )]
-    private ?string $pseudo = null;
-
-    #[ORM\Column(type:'string',length: 255, nullable: true)]
+    #[ORM\Column(type:Types::STRING,length: 255, nullable: true)]
     private ?string $photo = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     #[Assert\NotNull(message: 'Le statut actif est obligatoire.')]
     private bool $isActive = true;
 
-
-
-    /**
-     * @var Collection<int, Recette>
-     */
-    #[ORM\OneToMany(targetEntity: Recette::class, mappedBy: 'users')]
-    private Collection $recettes;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createAt = null;
 
     /**
+     * @var Collection<int, Recette>
+     */
+    #[ORM\OneToMany(targetEntity: Recette::class, mappedBy: 'user')]
+    private Collection $recettes;
+
+    /**
      * @var Collection<int, Commentaire>
      */
-    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'users')]
+    #[ORM\OneToMany(targetEntity: Commentaire::class, mappedBy: 'user')]
     private Collection $commentaires;
+
+    /**
+     * @var Collection<int, SauvergardeRecette>
+     */
+    #[ORM\OneToMany(targetEntity: SauvergardeRecette::class, mappedBy: 'user')]
+    private Collection $sauvergardeRecettes;
 
     /**
      * @var Collection<int, LikeRecette>
      */
-    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'users', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'user')]
     private Collection $likeRecettes;
+    
+    #[ORM\OneToMany(mappedBy: 'follower', targetEntity: UserFollow::class, orphanRemoval: true)]
+    private Collection $followings;
 
-    /**
-     * @var Collection<int, SauvegardeRecette>
-     */
-    #[ORM\OneToMany(targetEntity: SauvegardeRecette::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $sauvegardeRecettes;
+    #[ORM\OneToMany(mappedBy: 'following', targetEntity: UserFollow::class, orphanRemoval: true)]
+    private Collection $followers;
 
-    /**
-     * @var Collection<int, UserFollow>
-     */
-    #[ORM\OneToMany(targetEntity: UserFollow::class, mappedBy: 'follower', orphanRemoval: true)]
-    private Collection $userFollows;
 
    public function __construct()
 {
@@ -114,13 +113,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     $this->createAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
     $this->recettes = new ArrayCollection();
     $this->commentaires = new ArrayCollection();
+    $this->sauvergardeRecettes = new ArrayCollection();
     $this->likeRecettes = new ArrayCollection();
-    $this->sauvegardeRecettes = new ArrayCollection();
-    $this->userFollows = new ArrayCollection();
-}
-
+    $this->followings = new ArrayCollection();
+    $this->followers = new ArrayCollection();
   
-
+  
+}
     public function getId(): ?int
     {
         return $this->id;
@@ -233,6 +232,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
+  
+
+
+
+    public function getCreateAt(): ?\DateTimeImmutable
+    {
+        return $this->createAt;
+    }
+
+    public function setCreateAt(\DateTimeImmutable $createAt): static
+    {
+        $this->createAt = $createAt;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Recette>
      */
@@ -245,7 +260,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->recettes->contains($recette)) {
             $this->recettes->add($recette);
-            $recette->setUsers($this);
+            $recette->setUser($this);
         }
 
         return $this;
@@ -255,22 +270,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->recettes->removeElement($recette)) {
             // set the owning side to null (unless already changed)
-            if ($recette->getUsers() === $this) {
-                $recette->setUsers(null);
+            if ($recette->getUser() === $this) {
+                $recette->setUser(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCreateAt(): ?\DateTimeImmutable
-    {
-        return $this->createAt;
-    }
-
-    public function setCreateAt(\DateTimeImmutable $createAt): static
-    {
-        $this->createAt = $createAt;
 
         return $this;
     }
@@ -287,7 +290,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->commentaires->contains($commentaire)) {
             $this->commentaires->add($commentaire);
-            $commentaire->setUsers($this);
+            $commentaire->setUser($this);
         }
 
         return $this;
@@ -297,8 +300,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->commentaires->removeElement($commentaire)) {
             // set the owning side to null (unless already changed)
-            if ($commentaire->getUsers() === $this) {
-                $commentaire->setUsers(null);
+            if ($commentaire->getUser() === $this) {
+                $commentaire->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SauvergardeRecette>
+     */
+    public function getSauvergardeRecettes(): Collection
+    {
+        return $this->sauvergardeRecettes;
+    }
+
+    public function addSauvergardeRecette(SauvergardeRecette $sauvergardeRecette): static
+    {
+        if (!$this->sauvergardeRecettes->contains($sauvergardeRecette)) {
+            $this->sauvergardeRecettes->add($sauvergardeRecette);
+            $sauvergardeRecette->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSauvergardeRecette(SauvergardeRecette $sauvergardeRecette): static
+    {
+        if ($this->sauvergardeRecettes->removeElement($sauvergardeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($sauvergardeRecette->getUser() === $this) {
+                $sauvergardeRecette->setUser(null);
             }
         }
 
@@ -317,7 +350,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->likeRecettes->contains($likeRecette)) {
             $this->likeRecettes->add($likeRecette);
-            $likeRecette->setUsers($this);
+            $likeRecette->setUser($this);
         }
 
         return $this;
@@ -327,71 +360,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->likeRecettes->removeElement($likeRecette)) {
             // set the owning side to null (unless already changed)
-            if ($likeRecette->getUsers() === $this) {
-                $likeRecette->setUsers(null);
+            if ($likeRecette->getUser() === $this) {
+                $likeRecette->setUser(null);
             }
         }
 
         return $this;
     }
+
 
     /**
-     * @return Collection<int, SauvegardeRecette>
+     * @return Collection<int, UserFollow>
      */
-    public function getSauvegardeRecettes(): Collection
+    public function getFollowings(): Collection
     {
-        return $this->sauvegardeRecettes;
-    }
-
-    public function addSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
-    {
-        if (!$this->sauvegardeRecettes->contains($sauvegardeRecette)) {
-            $this->sauvegardeRecettes->add($sauvegardeRecette);
-            $sauvegardeRecette->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
-    {
-        if ($this->sauvegardeRecettes->removeElement($sauvegardeRecette)) {
-            // set the owning side to null (unless already changed)
-            if ($sauvegardeRecette->getUser() === $this) {
-                $sauvegardeRecette->setUser(null);
-            }
-        }
-
-        return $this;
+        return $this->followings;
     }
 
     /**
      * @return Collection<int, UserFollow>
      */
-    public function getUserFollows(): Collection
+    public function getFollowers(): Collection
     {
-        return $this->userFollows;
+        return $this->followers;
     }
 
-    public function addUserFollow(UserFollow $userFollow): static
-    {
-        if (!$this->userFollows->contains($userFollow)) {
-            $this->userFollows->add($userFollow);
-            $userFollow->setFollower($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserFollow(UserFollow $userFollow): static
-    {
-        if ($this->userFollows->removeElement($userFollow)) {
-            // set the owning side to null (unless already changed)
-            if ($userFollow->getFollower() === $this) {
-                $userFollow->setFollower(null);
-            }
-        }
-
-        return $this;
-    }
 }

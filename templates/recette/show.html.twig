@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la Recette{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    
+    <p><a href="{{ path('recette.index') }}">Retour à la indexe des recettes</a></p>
+
+    {% if recette is not empty %}
+        <h1>{{ recette.titre }}</h1>
+        <p><img src="/recettes/images/{{ recette.photo }}" alt="{{ recette.titre }}" style="max-width:100%; height:auto;"></p>
+
+        <p><strong>Nombre de likes :</strong> {{ recette.nbLike }}</p>
+        <p><strong>Nombre de likes :</strong> {{ recette.nbLike }}</p>
+        {% set userHasLiked = false %}
+        {% for like in recette.likeRecettes %}
+            {% if like.utilisateur == app.user %}
+                {% set userHasLiked = true %}
+            {% endif %}
+        {% endfor %}
+
+        {% if userHasLiked %}
+        
+            <form action="{{ path('recette.like', {id: recette.id}) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-secondary">👎 Retirer le Like</button>
+            </form>
+        {% else %}
+            <form action="{{ path('recette.like', {id: recette.id}) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-primary">👍 Ajouter un Like</button>
+            </form>
+        {% endif %}
+        
+        {{ form(form, {'method': 'POST'}) }}
+        
+    {% else %}
+        <p>Recette introuvable.</p>
+    {% endif %}
+
+    <h2>Commentaires {{ nbCommentaire }} </h2>    
+    {% if commentaires is not empty %}
+    <ul>
+        {% for commentaire in commentaires %}
+            <li>
+                <p> <img src="/admin/images/{{ commentaire.utilisateur.photo }}" alt="{{ commentaire.utilisateur.photo }}" style="max-width:10%; height:10;">
+                 {{ commentaire.utilisateur.pseudo }}</p>
+                <p>{{ commentaire.commentaire }}</p>
+                <small>Posté le {{ commentaire.createAt | date('d-m-Y H:i') }}</small>
+                
+                {# Vérifiez si l'utilisateur connecté est l'auteur du commentaire #}
+                {% if commentaire.utilisateur.id == app.user.id %}
+                    <form action="{{ path('commentaire.supprimer', {id: commentaire.id}) }}" method="post" style="display: inline;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
+        Supprimer
+    </button>
+</form>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucun commentaire pour cette recette.</p>
+{% endif %}
+</div>
+{% endblock %}

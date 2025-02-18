@@ -11,10 +11,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: RecetteRepository::class)]
-#[ORM\Table(name: "recette", uniqueConstraints: [
-    new ORM\UniqueConstraint(name: "unique_recette_utilisateur", columns: ["titre", "users_id"])
-])]
-
+##[ORM\Table(name: "recette", uniqueConstraints: [
+#    new ORM\UniqueConstraint(name: "unique_recette_utilisateur", columns: ["titre", "user_id"])
+#])]
 class Recette
 {
     #[ORM\Id]
@@ -23,9 +22,10 @@ class Recette
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'recettes')]
-    private ?User $users = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
-    #[ORM\Column(type: Types::TEXT,length: 100)]
+    #[ORM\Column(type: Types::STRING,length: 255)]
     #[NotBlank(message: 'Le titre ne doit pas être vide.')]
     #[Assert\Length(
         min: 3,
@@ -35,10 +35,7 @@ class Recette
     )]
     private ?string $titre = null;
 
-    #[ORM\Column(type: Types::TEXT,length: 255)]
-    private ?string $photo = null;
-
-    #[ORM\Column(type: Types::TEXT,)]
+    #[ORM\Column(type: Types::TEXT)]
     #[NotBlank(message: 'La préparation ne doit pas être vide.')]
     #[Assert\Length(
         min: 3,
@@ -47,15 +44,18 @@ class Recette
         maxMessage: 'La préparation ne doit pas dépasser {{ limit }} caractères.'
     )]
     #[Assert\Regex(
-        pattern: "/^[\p{L}0-9.,!?'\- ]{3,100}$/u",
+        pattern: "/^[\p{L}0-9.,!?'\- ]{3,400}$/u",
         message: 'Le titre ne peut contenir que des lettres, chiffres, espaces et ponctuations autorisées (. , ! ? \' -).'
     )]
     private ?string $preparation = null;
 
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    private ?bool $isActive = null;
+    #[ORM\Column(type: Types::STRING,length: 255)]
+    private ?string $photo = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::BOOLEAN, options:['default'=>false])]
+    private bool $isActive = false;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createAt = null;
 
     /**
@@ -65,39 +65,42 @@ class Recette
     private Collection $commentaires;
 
     /**
-     * @var Collection<int, LikeRecette>
+     * @var Collection<int, SauvergardeRecette>
      */
-    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'recette', orphanRemoval: true)]
-    private Collection $likeRecettes;
+    #[ORM\OneToMany(targetEntity: SauvergardeRecette::class, mappedBy: 'recette')]
+    private Collection $sauvergardeRecettes;
 
     /**
-     * @var Collection<int, SauvegardeRecette>
+     * @var Collection<int, LikeRecette>
      */
-    #[ORM\OneToMany(targetEntity: SauvegardeRecette::class, mappedBy: 'recette', orphanRemoval: true)]
-    private Collection $sauvegardeRecettes;
+    #[ORM\OneToMany(targetEntity: LikeRecette::class, mappedBy: 'recette')]
+    private Collection $likeRecettes;
 
     public function __construct()
     {
         $this->isActive = false;
         $this->createAt = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
         $this->commentaires = new ArrayCollection();
+        $this->sauvergardeRecettes = new ArrayCollection();
         $this->likeRecettes = new ArrayCollection();
-        $this->sauvegardeRecettes = new ArrayCollection();
+  
     }
+
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUsers(): ?User
+    public function getUser(): ?User
     {
-        return $this->users;
+        return $this->user;
     }
 
-    public function setUsers(?User $users): static
+    public function setUser(?User $user): static
     {
-        $this->users = $users;
+        $this->user = $user;
 
         return $this;
     }
@@ -107,6 +110,7 @@ class Recette
         return $this->titre;
     }
 
+
     public function setTitre(string $titre): static
     {
         $this->titre = trim(strtolower($titre));
@@ -114,17 +118,6 @@ class Recette
         return $this;
     }
 
-    public function getPhoto(): ?string
-    {
-        return $this->photo;
-    }
-
-    public function setPhoto(string $photo): static
-    {
-        $this->photo = trim(strtolower($photo));
-
-        return $this;
-    }
 
     public function getPreparation(): ?string
     {
@@ -134,6 +127,19 @@ class Recette
     public function setPreparation(string $preparation): static
     {
         $this->preparation = $preparation;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+
+    public function setPhoto(string $photo): static
+    {
+        $this->photo = trim(strtolower($photo));
 
         return $this;
     }
@@ -193,6 +199,36 @@ class Recette
     }
 
     /**
+     * @return Collection<int, SauvergardeRecette>
+     */
+    public function getSauvergardeRecettes(): Collection
+    {
+        return $this->sauvergardeRecettes;
+    }
+
+    public function addSauvergardeRecette(SauvergardeRecette $sauvergardeRecette): static
+    {
+        if (!$this->sauvergardeRecettes->contains($sauvergardeRecette)) {
+            $this->sauvergardeRecettes->add($sauvergardeRecette);
+            $sauvergardeRecette->setRecette($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSauvergardeRecette(SauvergardeRecette $sauvergardeRecette): static
+    {
+        if ($this->sauvergardeRecettes->removeElement($sauvergardeRecette)) {
+            // set the owning side to null (unless already changed)
+            if ($sauvergardeRecette->getRecette() === $this) {
+                $sauvergardeRecette->setRecette(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, LikeRecette>
      */
     public function getLikeRecettes(): Collection
@@ -216,36 +252,6 @@ class Recette
             // set the owning side to null (unless already changed)
             if ($likeRecette->getRecette() === $this) {
                 $likeRecette->setRecette(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, SauvegardeRecette>
-     */
-    public function getSauvegardeRecettes(): Collection
-    {
-        return $this->sauvegardeRecettes;
-    }
-
-    public function addSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
-    {
-        if (!$this->sauvegardeRecettes->contains($sauvegardeRecette)) {
-            $this->sauvegardeRecettes->add($sauvegardeRecette);
-            $sauvegardeRecette->setRecette($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSauvegardeRecette(SauvegardeRecette $sauvegardeRecette): static
-    {
-        if ($this->sauvegardeRecettes->removeElement($sauvegardeRecette)) {
-            // set the owning side to null (unless already changed)
-            if ($sauvegardeRecette->getRecette() === $this) {
-                $sauvegardeRecette->setRecette(null);
             }
         }
 

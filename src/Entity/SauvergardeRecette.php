@@ -2,27 +2,28 @@
 
 namespace App\Entity;
 
-use App\Repository\SauvegardeRecetteRepository;
+use Doctrine\DBAL\Types\Types;
+use App\Repository\SauvergardeRecetteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SauvegardeRecetteRepository::class)]
-class SauvegardeRecette
+#[ORM\Entity(repositoryClass: SauvergardeRecetteRepository::class)]
+class SauvergardeRecette
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type:Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'sauvegardeRecettes')]
+    #[ORM\ManyToOne(inversedBy: 'sauvergardeRecettes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'sauvegardeRecettes')]
+    #[ORM\ManyToOne(inversedBy: 'sauvergardeRecettes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Recette $recette = null;
 
-    #[ORM\Column]
-    private ?bool $isActive = null;
+    #[ORM\Column(type:Types::BOOLEAN, options: ['default' => true])]
+    private ?bool $isActive = true;
 
     public function getId(): ?int
     {

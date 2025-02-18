@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\SauvegardeRecette;
+use App\Entity\SauvergardeRecette;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<SauvegardeRecette>
+ * @extends ServiceEntityRepository<SauvergardeRecette>
  */
-class SauvegardeRecetteRepository extends ServiceEntityRepository
+class SauvergardeRecetteRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, SauvegardeRecette::class);
+        parent::__construct($registry, SauvergardeRecette::class);
     }
 
     //    /**
-    //     * @return SauvegardeRecette[] Returns an array of SauvegardeRecette objects
+    //     * @return SauvergardeRecette[] Returns an array of SauvergardeRecette objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class SauvegardeRecetteRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?SauvegardeRecette
+    //    public function findOneBySomeField($value): ?SauvergardeRecette
     //    {
     //        return $this->createQueryBuilder('s')
     //            ->andWhere('s.exampleField = :val')

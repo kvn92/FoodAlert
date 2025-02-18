@@ -4,24 +4,25 @@ namespace App\Entity;
 
 use App\Repository\UserFollowRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: UserFollowRepository::class)]
 class UserFollow
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userFollows')]
+    #[ORM\ManyToOne(inversedBy: 'followings')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $follower = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userFollows')]
+    #[ORM\ManyToOne(inversedBy: 'followers')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $following = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createAt = null;
 
     public function getId(): ?int
@@ -37,7 +38,6 @@ class UserFollow
     public function setFollower(?User $follower): static
     {
         $this->follower = $follower;
-
         return $this;
     }
 
@@ -49,7 +49,6 @@ class UserFollow
     public function setFollowing(?User $following): static
     {
         $this->following = $following;
-
         return $this;
     }
 
@@ -61,7 +60,6 @@ class UserFollow
     public function setCreateAt(\DateTimeImmutable $createAt): static
     {
         $this->createAt = $createAt;
-
         return $this;
     }
 }

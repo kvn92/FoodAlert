@@ -14,6 +14,7 @@ use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register',methods: ['GET', 'POST'])]
@@ -25,7 +26,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
-        //Regarder     $plainPassword = $form->has('plainPassword') ? $form->get('plainPassword')->getData() : null;
+          $plainPassword = $form->has('plainPassword') ? $form->get('plainPassword')->getData() : null;
 dump($plainPassword);
             
             // encode the plain password

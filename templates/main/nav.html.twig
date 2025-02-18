@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Menu</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">  
+        <li class="nav-item"><a class="nav-link" href="#">Admin</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ path('recette.index') }}">Recette</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Catégorie</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Difficulté</a></li>
+   
+      </ul>
+
+      {# Partie droite du menu : Connexion / Déconnexion #}
+      <ul class="navbar-nav ms-auto">
+        {% if app.user %}
+          <li class="nav-item">
+            <span class="nav-link">👤 {{ app.user.email }}</span> {# Utilise "email" si c'est ton identifiant #}
+          </li>
+          <li class="nav-item">
+            <form action="{{ path('app_logout') }}" method="post">
+              <button type="submit" class="btn btn-danger text-white">Déconnexion</button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link btn btn-primary text-black" href="{{ path('app_login') }}">Connexion</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
