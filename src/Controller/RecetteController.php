@@ -10,11 +10,16 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Recette;
+use App\Entity\SauvergardeRecette;
+use App\Entity\UserFollow;
 use App\Form\CommentaireType;
 use App\Form\RecetteType;
 use App\Repository\CommentaireRepository;
 use App\Repository\LikeRecetteRepository;
 use App\Repository\RecetteRepository;
+use App\Repository\SauvergardeRecetteRepository;
+use App\Repository\UserFollowRepository;
+use App\Repository\UserRepository;
 use App\Service\DeleteService;
 use App\Service\StatsService;
 use App\Service\StatusToggleService;
@@ -93,6 +98,7 @@ public function show(
     Request $request,
     RecetteRepository $recetteRepository,
     CommentaireRepository $commentaireRepository,
+    LikeRecetteRepository $likeRecetteRepository,
     Security $security,
     EntityManagerInterface $entityManager,
     int $id
@@ -104,6 +110,7 @@ public function show(
 
     $commentaires = $commentaireRepository->findBy(['recette' => $recette], ['createAt' => 'DESC']);
     $nbCommentaire = $commentaireRepository->count(['recette' => $recette]);
+    $nnLike = $commentaireRepository->count(['recette'=>$recette]);
 
     $commentaire = new Commentaire();
     $form = $this->createForm(CommentaireType::class, $commentaire);
@@ -123,7 +130,7 @@ public function show(
         $entityManager->flush();
         $this->addFlash('success', 'Commentaire ajouté avec succès.');
 
-        return $this->redirectToRoute('show', ['id' => $id]);
+        return $this->redirectToRoute('recette.show', ['id' => $id]);
     }
 
     return $this->render('recette/show.html.twig', [
@@ -131,6 +138,7 @@ public function show(
         'form' => $form->createView(),
         'commentaires' => $commentaires,
         'nbCommentaire' => $nbCommentaire,
+        'nbLike'=>$nnLike,
     ]);
 }
 
@@ -257,5 +265,92 @@ public function show(
     
         return $this->redirectToRoute('recette.show', ['id' => $id]);
     }
+
+
+    #[Route('/{id}/sauvegarder', name: 'sauvegarder', methods: ['POST'])]
+    public function toggleSauvegarde(
+        int $id, 
+        RecetteRepository $recetteRepository, 
+        SauvergardeRecetteRepository $sauvergardeRecetteRepository, 
+        EntityManagerInterface $entityManager,
+        Security $security
+    ): Response {
+        $recette = $recetteRepository->find($id);
+        $user = $security->getUser();
+    
+        if (!$recette) {
+            throw $this->createNotFoundException('Recette introuvable.');
+        }
+    
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté pour liker une recette.');
+            return $this->redirectToRoute('recette.show', ['id' => $id]);
+        }
+    
+        // Vérifier si l'utilisateur a déjà liké cette recette
+        $sauvegarder = $sauvergardeRecetteRepository->findOneBy(['user' => $user, 'recette' => $recette]);
+    
+        if ($sauvegarder) {
+            // Supprimer le like
+            $entityManager->remove($sauvegarder);
+            $this->addFlash('success', 'Like retiré.');
+        } else {
+            // Ajouter un like
+            $sauvegarder = new SauvergardeRecette();
+            $sauvegarder->setUser($user);
+            $sauvegarder->setRecette($recette);
+            $sauvegarder->setIsActive(true);
+            $entityManager->persist($sauvegarder);
+            $this->addFlash('success', 'Recette dans les favoris.');
+        }
+    
+        $entityManager->flush();
+    
+        return $this->redirectToRoute('recette.show', ['id' => $id]);
+    }
+
+    #[Route('/{id}/following', name: 'following', methods: ['POST','GET'])]
+public function toggleFollow(
+    int $id, 
+    UserRepository $userRepository, 
+    UserFollowRepository $userFollowRepository, 
+    EntityManagerInterface $entityManager,
+    Security $security
+): Response {
+    $userToFollow = $userRepository->find($id);
+    $user = $security->getUser();
+
+    if (!$userToFollow) {
+        throw $this->createNotFoundException('Utilisateur introuvable.');
+    }
+
+    if (!$user) {
+        $this->addFlash('error', 'Vous devez être connecté pour suivre un utilisateur.');
+        return $this->redirectToRoute('recette.show', ['id' => $id]);
+    }
+
+    // Vérifier si l'utilisateur suit déjà l'autre utilisateur
+    $existingFollow = $userFollowRepository->findOneBy([
+        'follower' => $user, 
+        'following' => $userToFollow
+    ]);
+
+    if ($existingFollow) {
+        // Supprimer le suivi
+        $entityManager->remove($existingFollow);
+        $this->addFlash('success', 'Vous ne suivez plus cet utilisateur.');
+    } else {
+        // Ajouter le suivi
+        $newFollow = new UserFollow();
+        $newFollow->setFollower($user);
+        $newFollow->setFollowing($userToFollow);
+        $entityManager->persist($newFollow);
+        $this->addFlash('success', 'Vous suivez cet utilisateur.');
+    }
+
+    $entityManager->flush();
+
+    return $this->redirectToRoute('recette.show', ['id' => $id]);
+}
 
 }   

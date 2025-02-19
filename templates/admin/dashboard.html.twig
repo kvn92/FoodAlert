@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Administrateur</title>
+    <style>
+        .dashboard {
+            display: flex;
+            gap: 20px;
+        }
+        .counter {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tableau de Bord Administrateur</h1>
+    <div class="dashboard">
+      <section class="menu 1">
+        <div class="counter">
+        <a href='{{ path('admin.membres') }}' alt="membres">
+            <h3>Gestion des Membres</h3>
+            <p>{{ statsRecette.actives }}</p>
+            </a>
+        </div>
+        <div class="counter">
+        <a href="{{ path('admin.recettes') }}">
+            <h3>Gestion des Recettes</h3>
+            <p>{{ statsRecette.actives }}</p>
+        </a>
+        </div>
+        <div class="counter">
+            <h3>Setting</h3>
+            <p>Setting</p>
+        </div>
+        </section>
+
+        <section>
+             <div class="counter">
+            <a href="{{path('admin.recettes.validation') }}" alt="" >
+            <h3>Validation des Recettes</h3>
+            <p>{{ statsRecette.inactives }}</p>
+            </a>
+
+             <div class="counter">
+            <a href="{{path('admin.commentaires.validation') }}" alt="" >
+            <h3>Validation des commentaires</h3>
+            <p>{{ statsCommentaire.inactives }}</p>
+            </a>
+        </div>
+        </section> 
+    </div>
+</body>
+</html>

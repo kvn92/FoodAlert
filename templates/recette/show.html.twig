@@ -13,6 +13,8 @@
     <p><a href="{{ path('recette.index') }}">Retour à la indexe des recettes</a></p>
 
     {% if recette is not empty %}
+
+     <h1>{{ recette.user.pseudo }} <a href="{{ path('recette.following', {id: recette.id})  }}">suivre </a></h1> <h1><small>Posté le {{ recette.createAt | date('d-m-Y H:i') }}</small></p>
         <h1>{{ recette.titre }}</h1>
         <p><img src="/recettes/images/{{ recette.photo }}" alt="{{ recette.titre }}" style="max-width:100%; height:auto;"></p>
 
@@ -34,6 +36,17 @@
                 <button type="submit" class="btn btn-primary">👍 Ajouter un Like</button>
             </form>
         {% endif %}
+
+                {% if userHasLiked %}
+        
+            <form action="{{ path('recette.sauvegarder', {id: recette.id}) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-secondary">👎 Retirer Liste des favoris</button>
+            </form>
+        {% else %}
+            <form action="{{ path('recette.sauvegarder', {id: recette.id}) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-primary">👍 Ajouter aux favoris</button>
+            </form>
+        {% endif %}
         
         {{ form(form, {'method': 'POST'}) }}
         
@@ -41,6 +54,7 @@
         <p>Recette introuvable.</p>
     {% endif %}
 
+    <h2>Jaime {{ nbLike }} </h2>
     <h2>Commentaires {{ nbCommentaire }} </h2>    
     {% if commentaires is not empty %}
     <ul>

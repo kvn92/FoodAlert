@@ -16,6 +16,21 @@ class UserFollowRepository extends ServiceEntityRepository
         parent::__construct($registry, UserFollow::class);
     }
 
+
+     /**
+     * Récupère les utilisateurs ayant uniquement le rôle ROLE_USER
+     *
+     * @return User[]
+     */
+    public function findUsersByRole(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
+            ->setParameter('role', '"ROLE_USER"')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return UserFollow[] Returns an array of UserFollow objects
     //     */
