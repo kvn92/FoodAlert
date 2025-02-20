@@ -28,10 +28,10 @@ class RecetteType extends AbstractType
                 'mapped' => false, // Pour éviter les erreurs sur l'entité
                 'constraints' => [
                     new File([
-                        'maxSize' => '10M',
+                        'maxSize' => '20M',
                         'maxSizeMessage' => 'Le fichier est trop volumineux (10 Mo max)',
-                        'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Seuls les fichiers JPEG et PNG sont autorisés',
+                        'mimeTypes' => ['image/jpeg', 'image/png','image/jpg'],
+                        'mimeTypesMessage' => 'Seuls les fichiers JPEG , PNG  et JPG sont autorisés',
                     ])
                 ]
             ])
@@ -53,7 +53,6 @@ class RecetteType extends AbstractType
             ])
             ;
         }
-       $builder->add('submit',SubmitType::class,['label'=>'Ajouter']);
 
     }
    

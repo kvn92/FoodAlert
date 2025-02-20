@@ -41,16 +41,13 @@ class Recette
     #[Assert\Length(
         min: 3,
         minMessage: 'La préparation doit contenir au moins {{ limit }} caractères.',
-        max:400,
+        max:1000,
         maxMessage: 'La préparation ne doit pas dépasser {{ limit }} caractères.'
-    )]
-    #[Assert\Regex(
-        pattern: "/^[\p{L}0-9.,!?'\- ]{3,400}$/u",
-        message: 'Le titre ne peut contenir que des lettres, chiffres, espaces et ponctuations autorisées (. , ! ? \' -).'
     )]
     private ?string $preparation = null;
 
     #[ORM\Column(type: Types::STRING,length: 255)]
+    #[NotBlank(message:'La photo est obligatoire', groups:['creation'])]
     private ?string $photo = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options:['default'=>false])]

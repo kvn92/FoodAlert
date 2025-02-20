@@ -66,7 +66,7 @@ class RecetteController extends AbstractController
         }
 
         $recette = new Recette();
-        $form = $this->createForm(RecetteType::class, $recette);
+        $form = $this->createForm(RecetteType::class, $recette,['is_edit'=>true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -88,7 +88,7 @@ class RecetteController extends AbstractController
         }
 
         return $this->render('recette/new.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form->createView(),Response::HTTP_CREATED
         ]);
     }
 
@@ -154,6 +154,7 @@ public function show(
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Recette $recette, Security $security ): Response
     {
+        $titrePage = $recette->getTitre();
         $user = $security->getUser();
         if (!$user) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour Modifier une recette.');
@@ -184,7 +185,8 @@ public function show(
                     $recette->setPhoto($fileName);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Erreur lors de l’upload de l’image.');
-                    return $this->redirectToRoute('index.edit', ['id' => $recette->getId()]);
+                    return $this->redirectToRoute('index.edit', 
+                    ['id' => $recette->getId(),Response::HTTP_SEE_OTHER]);
                 }
             }
 
@@ -195,6 +197,7 @@ public function show(
 
         return $this->render('recette/edit.html.twig', [
             'form' => $form->createView(),
+            'titrePage'=> $titrePage 
         ]);
     }
 
@@ -209,7 +212,6 @@ public function show(
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]    
-    
     public function delete(Recette $recette, Request $request, DeleteService $deleteService): Response
     {
         $wordEntity = 'recette';
@@ -224,7 +226,7 @@ public function show(
         return $this->redirectToRoute($wordEntity.'.index');
     }
 
-    #[Route('/{id}/like', name: 'like', methods: ['POST'])]
+    #[Route('/{id}/like', name: 'like', methods: ['POST','GET'])]
     public function toggleLike(
         int $id, 
         RecetteRepository $recetteRepository, 
@@ -267,7 +269,7 @@ public function show(
     }
 
 
-    #[Route('/{id}/sauvegarder', name: 'sauvegarder', methods: ['POST'])]
+    #[Route('/{id}/sauvegarder', name: 'sauvegarder', methods: ['POST','GET'])]
     public function toggleSauvegarde(
         int $id, 
         RecetteRepository $recetteRepository, 
@@ -352,5 +354,7 @@ public function toggleFollow(
 
     return $this->redirectToRoute('recette.show', ['id' => $id]);
 }
+
+
 
 }   

@@ -29,7 +29,7 @@ class DeleteFormType extends AbstractType
         $resolver->setDefaults([
             'csrf_protection' => true,
             'csrf_field_name' => '_token',
-            'csrf_token_id' => null, // À définir dynamiquement
+            'csrf_token_id' => 'default_delete_token', // À définir dynamiquement
         ]);
     }
 }

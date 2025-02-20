@@ -32,18 +32,20 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/dashboard', name: 'dashboard',methods:['GET','POST'])]
-    public function dashboard(UserRepository $userRepository, RecetteRepository $recetteRepository, StatsService $statsService): Response
+    public function dashboard(StatsService $statsService): Response
     {
-        $statsRecette = $statsService->getEntityStats(Recette::class); 
-        $statsMembre = $statsService->getEntityStats(User::class);
-        $statsCommentaire = $statsService->getEntityStats(Commentaire::class);
+        $statsRecettes = $statsService->getEntityStats(Recette::class); 
+        $statsMembres = $statsService->getEntityStats(User::class);
+        $statsCommentaires = $statsService->getEntityStats(Commentaire::class);
 
         return $this->render('admin/dashboard.html.twig', [
-            'statsRecette' => $statsRecette,
-            'statsMembre'=>$statsMembre,
-            'statsCommentaire'=>$statsCommentaire
+            'statsRecettes' => $statsRecettes,
+            'statsMembres'=>$statsMembres,
+            'statsCommentaires'=>$statsCommentaires
         ]);
     }
+
+    
 
     #[Route('/recettes', name:'recettes',methods:['GET','POST'])]
     public function listeRecette(RecetteRepository $recetteRepository, StatsService $statsService, DeleteService $deleteService): Response
@@ -51,7 +53,7 @@ final class AdminController extends AbstractController
         $titre = 'Recettes';
         $titrePage = strtoupper($titre);
 
-        $recettes = $recetteRepository->findAll();
+        $recettes = $recetteRepository->findBy([],['createAt' => 'DESC']);
         $stats = $statsService->getEntityStats(Recette::class); 
 
 
@@ -71,21 +73,21 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/membres', name:'membres',methods:['GET','POST'])]
-    public function listeMembre(UserRepository $userRepository, StatsService $statsService): Response
+    public function listeMembre(UserRepository $userRepository, StatsService $statsService, DeleteService $deleteService ): Response
     { $titre = 'Membre';
         $titrePage = strtoupper($titre);
 
-        $users = $userRepository->findUsersByRole();
+        $users = $userRepository->findBy(['ROLE_USER']);
         $stats = $statsService->getEntityStats(User::class); 
 
 
         $deleteForms = [];
         foreach ($users as $v) { // Ne pas écraser la variable $viande
             $deleteForms[$v->getId()] = $deleteService
-                ->createDeleteForm($v, 'delete_utlisateurs')
+                ->createDeleteForm($v, 'delete_recettes')
                 ->createView();
         }
-        return $this->render('admin/liste-recette.html.twig', [
+        return $this->render('admin/liste-membre.html.twig', [
             'users'=>$users,
             'stats'=>$stats,
             'titre'=>$titre,
@@ -111,5 +113,11 @@ final class AdminController extends AbstractController
         return $this->render('admin/recetteValidation.htm.twig',[
 
         ]);
+    }
+
+    #[Route('/setting', name:'setting',methods:['GET','POST'])]
+    public function setting():Response{
+
+        return $this->render('admin/setting.html.twig');
     }
 }

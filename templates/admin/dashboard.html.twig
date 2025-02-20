@@ -2,59 +2,165 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tableau de Bord Administrateur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        .dashboard {
-            display: flex;
-            gap: 20px;
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
         }
-        .counter {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            flex: 1;
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
         }
+        .section-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+        .section-box h2 {
+            margin-bottom: 25px;
+        }
+        .card {
+            border-radius: 10px;
+            transition: 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .card .icon {
+            font-size: 2rem;
+            color: #fff;
+        }
+        .bg-primary, .bg-success, .bg-warning, .bg-danger, .bg-info {
+            color: #fff !important;
+        }
+
+        h2 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #343a40;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
     </style>
 </head>
 <body>
-    <h1>Tableau de Bord Administrateur</h1>
-    <div class="dashboard">
-      <section class="menu 1">
-        <div class="counter">
-        <a href='{{ path('admin.membres') }}' alt="membres">
-            <h3>Gestion des Membres</h3>
-            <p>{{ statsRecette.actives }}</p>
-            </a>
-        </div>
-        <div class="counter">
-        <a href="{{ path('admin.recettes') }}">
-            <h3>Gestion des Recettes</h3>
-            <p>{{ statsRecette.actives }}</p>
-        </a>
-        </div>
-        <div class="counter">
-            <h3>Setting</h3>
-            <p>Setting</p>
-        </div>
-        </section>
 
-        <section>
-             <div class="counter">
-            <a href="{{path('admin.recettes.validation') }}" alt="" >
-            <h3>Validation des Recettes</h3>
-            <p>{{ statsRecette.inactives }}</p>
-            </a>
+<div class="container dashboard-container">
+    <h1 class="text-center mb-4">Tableau de Bord Administrateur</h1>
 
-             <div class="counter">
-            <a href="{{path('admin.commentaires.validation') }}" alt="" >
-            <h3>Validation des commentaires</h3>
-            <p>{{ statsCommentaire.inactives }}</p>
-            </a>
+    <!-- Section 1 : Gestion principale -->
+    <section class="section-box">
+        <h2 class="text-center">Gestion principale</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ path('admin.membres') }}">
+                    <div class="card bg-primary text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3>Gestion des Membres</h3>
+                                <p class="fs-4">
+                                {% if statsMembres.total == false %}
+                                    0 Membres
+                                {% endif %}
+                                {{ statsMembres.total }}</p>
+                            </div>
+                            <i class="fas fa-users icon"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ path('admin.recettes') }}">
+                    <div class="card bg-success text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3>Gestion des Recettes</h3>
+
+                                <p class="fs-4">{% if statsRecettes.actives == false %}
+                                    0  Recettes
+                                {% endif %}{{ statsRecettes.actives }}</p>
+                            </div>
+                            <i class="fas fa-utensils icon"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="{{ path('admin.setting') }}">
+                    <div class="card bg-warning text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3>Paramètres</h3>
+                                <p class="fs-4">Configuration</p>
+                            </div>
+                            <i class="fas fa-cog icon"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
-        </section> 
-    </div>
+    </section>
+
+    <!-- Section 2 : Validation -->
+    <section class="section-box">
+        <h2 class="text-center">Validation</h2>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <a href="{{ path('admin.recettes.validation') }}">
+                    <div class="card bg-danger text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3>Validation des Recettes</h3>
+                                <p class="fs-4">
+                                    {% if statsRecettes.inactives ==  false %}
+                                         Aucune à l'attente
+                                    {% endif %}
+                                {{ statsRecettes.inactives }}</p>
+                            </div>
+                            <i class="fas fa-check-circle icon"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-5">
+                <a href="{{ path('admin.commentaires.validation') }}">
+                    <div class="card bg-info text-white p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3>Validation des Commentaires</h3>
+                                <p class="fs-4"> {% if statsCommentaires.inactives == true %}
+                                    Aucune à l'attente
+                                {% endif %}
+                                {{ statsCommentaires.inactives }}</p>
+                            </div>
+                            <i class="fas fa-comments icon"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
