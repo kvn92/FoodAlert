@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: UserFollowRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_FOLLOW_SAVE', columns: ['followings','followers'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_FOLLOW_SAVE', columns: ['follower_id','following_id'])]
 
 class UserFollow
 {

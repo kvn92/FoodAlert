@@ -7,7 +7,7 @@ use App\Repository\SauvergardeRecetteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SauvergardeRecetteRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_RECETTE_SAVE', columns: ['titre','user_id'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_RECETTE_SAVE', columns: ['user_id','recette_id'])]
 
 class SauvergardeRecette
 {

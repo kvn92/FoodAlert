@@ -120,4 +120,12 @@ final class AdminController extends AbstractController
 
         return $this->render('admin/setting.html.twig');
     }
+
+
+    #[Route('/home',name:'home', methods:['GET'])]
+
+    public function home(){
+
+       return  $this->render('home/acc.html.twig');
+    }
 }
