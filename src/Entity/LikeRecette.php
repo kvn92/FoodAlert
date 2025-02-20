@@ -5,7 +5,10 @@ namespace App\Entity;
 use App\Repository\LikeRecetteRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+
 #[ORM\Entity(repositoryClass: LikeRecetteRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_RECETTE_lIKE', columns: ['user_id','recette_id'])]
+
 class LikeRecette
 {
     #[ORM\Id]

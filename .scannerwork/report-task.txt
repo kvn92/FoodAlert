@@ -1,0 +1,6 @@
+projectKey=FoodAlert
+serverUrl=http://localhost:9001
+serverVersion=24.12.0.100206
+dashboardUrl=http://localhost:9001/dashboard?id=FoodAlert
+ceTaskId=2fd19ddb-2d72-4b14-aedf-afb4212e68d8
+ceTaskUrl=http://localhost:9001/api/ce/task?id=2fd19ddb-2d72-4b14-aedf-afb4212e68d8
