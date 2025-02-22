@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accueil - Plateforme de Recettes</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .hero {
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            border-radius: 15px;
+            position: relative;
+            color: white;
+        }
+        .hero-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .recipe-card {
+            transition: transform 0.3s ease-in-out;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .recipe-card:hover {
+            transform: scale(1.03);
+        }
+        .recipe-card img {
+            height: 180px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+        }
+        .card-footer img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+        .likes {
+            display: flex;
+            align-items: center;
+            color: #ff4757;
+            font-weight: bold;
+        }
+        .likes i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-lg mt-4">
+    <!-- Section Hero avec une grande image -->
+    <div class="hero mb-5" style="background-image: url('https://source.unsplash.com/1200x600/?food,recipe');">
+        <div class="hero-overlay">
+            <div>
+                <h1>Découvrez les meilleures recettes partagées par la communauté</h1>
+                <p class="lead">Rejoignez-nous et proposez vos propres créations !</p>
+                <a href="#" class="btn btn-warning btn-lg mt-3">Partager une recette</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Colonne principale -->
+        <div class="col-lg-10 mx-auto">
+            
+            <!-- Section Dernières Recettes -->
+            <h2 class="text-center mb-4">📌 Dernières Recettes</h2>
+            <div class="row g-4">
+                {% for recettesDerniereSortie in recettesDerniereSortie %}
+                
+           
+                <div class="col-md-3">
+                    <div class="card recipe-card shadow-sm">
+                        <img src="{{ asset('uploads/recettes/' ~  recettesDerniereSortie.photo) }}" class="card-img-top" alt="Recette">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ recettesDerniereSortie.titre }}</h5>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ asset('uploads/users/' ~  recettesDerniereSortie.user.photo) }}" alt="{{ recettesDerniereSortie.user.pseudo}}">
+                                <span class="ms-2">{{ recettesDerniereSortie.user.pseudo}}</span>
+                            </div>
+                            <div class="likes">
+                                <i class="fas fa-heart"></i> {{ recettesDerniereSortie.likeRecettes|length }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+
+            <!-- Section Recettes Re Populaire -->
+            <h2 class="text-center mb-4">📌  Recettes Populaire</h2>
+            <div class="row g-4">
+
+            {% for recettesPopulaire in recettesPopulaires %}
+                
+           
+                <div class="col-md-3">
+                    <div class="card recipe-card shadow-sm">
+                        <img src="" class="card-img-top" alt="">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{recettesPopulaire.titre }}</h5>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex align-items-center">
+                                <img src="" alt="Auteur">
+                                <span class="ms-2">Marie C.</span>
+                            </div>
+                            <div class="likes">
+                                <i class="fas fa-heart"></i> 120
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 {% endfor %}
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+{% endblock %}

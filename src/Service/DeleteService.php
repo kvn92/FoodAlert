@@ -8,25 +8,21 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use App\Form\DeleteFormType;
 
 class DeleteService
 {
     private EntityManagerInterface $entityManager;
     private RouterInterface $router;
-    private CsrfTokenManagerInterface $csrfTokenManager;
     private FormFactoryInterface $formFactory;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         RouterInterface $router,
-        CsrfTokenManagerInterface $csrfTokenManager,
         FormFactoryInterface $formFactory
     ) {
         $this->entityManager = $entityManager;
         $this->router = $router;
-        $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory = $formFactory;
     }
 

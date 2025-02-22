@@ -1,0 +1,14 @@
+
+
+
+<p>{{ user.pseudo }}</p>
+<p>{{ user.email }}
+<p>date d'inscription{{ user.createAt|date('d-m-Y') }}</p>
+
+<p>Nombre de favoris dans sa liste {{ user.sauvergardeRecettes|length }}</p>
+
+<p>Nombre de recette publier {{ user.recettes|length }}</p>
+<p>Nombre de commentaire publier {{ user.commentaires|length }}</p>
+
+<p>Nombre de following {{ user.followings|length }}</p>
+<p>Nombre de follower {{ user.followers|length }}</p>
